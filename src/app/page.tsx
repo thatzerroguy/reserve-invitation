@@ -90,7 +90,7 @@ export default function InvitationPage() {
           >
             RSVP
           </button>
-          <p className={'text-sm text-black mt-4 place-self-end'}>Designed by <a href={'https://idcode.ng/'}>idcode.ng</a></p>
+          <p className={'text-sm text-black mt-4 place-self-end'}>Designed by <a href={'https://idcode.ng/'}>Idcode.ng</a></p>
         </div>
       </main>
   );
