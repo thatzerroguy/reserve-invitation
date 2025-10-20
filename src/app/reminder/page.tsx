@@ -48,7 +48,7 @@ export default function ReminderPage() {
 
                     <button
                         onClick={handleSetReminder}
-                        className="w-full bg-black text-white font-semibold py-2 rounded-md border border-yellow-500 hover:bg-gray-900 transition"
+                        className="w-full bg-black text-white font-semibold py-2 rounded-md border border-yellow-500 hover:bg-gray-900 active:bg-yellow-600 active:border-black transition"
                     >
                         SET REMINDER
                     </button>

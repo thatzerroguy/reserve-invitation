@@ -33,12 +33,12 @@ export default function InvitationPage() {
                 alt="Lasbat Iyabode Akinleye 50th Anniversary"
                 width={120}
                 height={120}
-                className="mx-auto"
+                className="mx-auto rounded-full"
             />
           </div>
 
           {/* Text */}
-          <h1 className="text-xl md:text-2xl font-bold text-gray-800 mb-3">
+          <h1 className="text-lg md:text-xl font-bold text-yellow-600 mb-3">
             Invitation Verified
           </h1>
 
@@ -47,13 +47,13 @@ export default function InvitationPage() {
             Welcome as we celebrate the golden jubilee of
           </p>
 
-          <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-4">
+          <h3 className="text-2xl md:text-2xl font-bold text-gray-900 mb-4">
             Taiwo Felicia
           </h3>
-          <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-1">
+          <h3 className="text-lg md:text-2xl font-bold text-gray-900 mb-1">
             &
           </h3>
-          <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-4">
+          <h3 className="text-2xl md:text-2xl font-bold text-gray-900 mb-4">
             Kehinde Mary
           </h3>
 
@@ -69,24 +69,24 @@ export default function InvitationPage() {
           <div className="flex flex-col space-y-3 w-full">
             <button
                 onClick={handleSetReminder}
-                className="w-full bg-black text-white font-semibold py-2 rounded-md border border-yellow-500 hover:bg-gray-900 transition"
+                className="w-full bg-black text-white font-semibold py-3 rounded-md border border-yellow-500 hover:bg-gray-900 active:bg-yellow-600 active:border-black transition"
             >
               SET REMINDER
             </button>
             <button
                 onClick={handleVenueDirection}
-                className="w-full bg-black text-white font-semibold py-2 rounded-md border border-yellow-500 hover:bg-gray-900 transition"
+                className="w-full bg-black text-white font-semibold py-3 rounded-md border border-yellow-500 hover:bg-gray-900 active:bg-yellow-600 active:border-black transition"
             >
               VENUE DIRECTION
             </button>
-            <button className="w-full bg-black text-white font-semibold py-2 rounded-md border border-yellow-500 hover:bg-gray-900 transition">
+            <button className="w-full bg-black text-white font-semibold py-3 rounded-md border border-yellow-500 hover:bg-gray-900 active:bg-yellow-600 active:border-black transition">
               ORDER OF SERVICE
             </button>
           </div>
 
           <button
               onClick={handleRSVP}
-              className="mt-5 w-full bg-black text-white font-semibold py-2 rounded-md border border-yellow-500 hover:bg-gray-900 transition"
+              className="mt-5 w-full bg-black text-white font-semibold py-3 rounded-md border border-yellow-500 hover:bg-gray-900 active:bg-yellow-600 active:border-black transition"
           >
             RSVP
           </button>
