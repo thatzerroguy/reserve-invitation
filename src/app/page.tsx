@@ -38,7 +38,7 @@ export default function InvitationPage() {
           </div>
 
           {/* Text */}
-          <h1 className="text-lg md:text-xl font-bold text-yellow-600 mb-3">
+          <h1 className="text-xl md:text-xl font-bold text-yellow-600 mb-3">
             Invitation Verified
           </h1>
 
