@@ -39,7 +39,7 @@ export default function InvitationPage() {
 
           {/* Text */}
           <h1 className="text-xl md:text-xl font-bold text-yellow-600 mb-3">
-            Invitation Verified
+            INVITATION VERIFIED
           </h1>
 
 
@@ -90,6 +90,7 @@ export default function InvitationPage() {
           >
             RSVP
           </button>
+          <p className={'text-sm text-black mt-4 place-self-end'}>Designed by <a href={'https://idcode.ng/'}>idcode.ng</a></p>
         </div>
       </main>
   );
