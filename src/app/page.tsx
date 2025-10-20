@@ -44,7 +44,7 @@ export default function InvitationPage() {
 
 
           <p className="text-gray-700 mb-4 text-sm md:text-base">
-            Welcome as we celebrate the diamond jubilee of
+            Welcome as we celebrate the Diamond Jubilee of
           </p>
 
           <h3 className="text-2xl md:text-2xl font-bold text-gray-900 mb-4">
