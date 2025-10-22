@@ -23,6 +23,10 @@ export default function InvitationPage() {
     router.push('/reminder');
   };
 
+  const handleOrderService = () => {
+    router.push('/order-service');
+  };
+
   return (
       <main className="flex flex-col items-center justify-center min-h-screen bg-gray-50 px-4 py-8">
         <div className="flex flex-col items-center text-center bg-white shadow-md rounded-lg w-full max-w-sm md:max-w-md lg:max-w-lg p-6 md:p-10">
@@ -79,7 +83,10 @@ export default function InvitationPage() {
             >
               VENUE DIRECTION
             </button>
-            <button className="w-full bg-black text-white font-semibold py-3 rounded-md border border-yellow-500 hover:bg-gray-900 active:bg-yellow-600 active:border-black transition">
+            <button
+                onClick={handleOrderService}
+                className="w-full bg-black text-white font-semibold py-3 rounded-md border border-yellow-500 hover:bg-gray-900 active:bg-yellow-600 active:border-black transition"
+            >
               ORDER OF SERVICE
             </button>
           </div>
