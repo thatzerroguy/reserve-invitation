@@ -1,6 +1,7 @@
 'use client';
 
 import {useState} from 'react';
+import {useRouter} from "next/navigation";
 
 export default function ReminderPage() {
     const [date, setDate] = useState('');
@@ -14,6 +15,12 @@ export default function ReminderPage() {
         } else {
             alert('Please select both date and time.');
         }
+    };
+
+    const router = useRouter();
+
+    const handleBack = () => {
+        router.back();
     };
 
     return (
@@ -51,6 +58,12 @@ export default function ReminderPage() {
                         className="w-full bg-black text-white font-semibold py-2 rounded-md border border-yellow-500 hover:bg-gray-900 active:bg-yellow-600 active:border-black transition"
                     >
                         SET REMINDER
+                    </button>
+                    <button
+                        onClick={handleBack}
+                        className="w-full bg-black text-white font-semibold py-2 rounded-md border border-yellow-500 hover:bg-gray-900 active:bg-yellow-600 active:border-black transition"
+                    >
+                        BACK TO INVITATION
                     </button>
                 </div>
 

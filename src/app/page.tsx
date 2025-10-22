@@ -9,7 +9,7 @@ export default function InvitationPage() {
   // Phone number & Google Maps link (you can replace these later)
   const phoneNumber = '+2348032560690';
   const mapLink =
-      'https://maps.app.goo.gl/uGmD9fgJQQM4mgsy6';
+      'https://maps.app.goo.gl/NyvQw3YMsG5Eqw9x6';
 
   const handleRSVP = () => {
     window.location.href = `tel:${phoneNumber}`;
@@ -65,8 +65,8 @@ export default function InvitationPage() {
           <div className="text-gray-700 text-sm md:text-base space-y-1 mb-6">
             <p><span className="font-semibold">Date:</span> 25th December 2025</p>
             <p><span className="font-semibold">Time:</span> 10.00am</p>
-            <p>Adebisi Asabi Multipurpose Hall (AAMH)</p>
-            <p>3, Omolade Oguntade Crescent Idiroko Rd, Ota, Ogun State</p>
+            <p>ABIGAIL OMOTAYO EVENT CENTRE</p>
+            <p>ALAMEDA BUS STOP. OPPOSITE IFO HIGH COURT IFO. OGUN STATE</p>
           </div>
 
           {/* Buttons */}
