@@ -17,6 +17,8 @@ export const metadata: Metadata = {
   description: "Reservation invitation for the Diamond Jubilee Celebration",
     icons: {
       icon: "/logo.png",
+      shortcut: "/logo.png",
+      apple: "/logo.png",
     }
 };
 
