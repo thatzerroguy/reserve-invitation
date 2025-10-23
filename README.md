@@ -42,11 +42,19 @@ This project uses Nodemailer to send email reminders. To set up the email functi
 1. Create a `.env.local` file in the root directory with the following variables:
 
 ```
+# Option 1: Using Gmail with SSL (recommended)
 EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_SECURE=false
+EMAIL_PORT=465
+EMAIL_SECURE=true
 EMAIL_USER=your-email@gmail.com
 EMAIL_PASS=your-app-password
+
+# Option 2: Using Gmail with TLS
+# EMAIL_HOST=smtp.gmail.com
+# EMAIL_PORT=587
+# EMAIL_SECURE=false
+# EMAIL_USER=your-email@gmail.com
+# EMAIL_PASS=your-app-password
 ```
 
 2. For Gmail, you need to use an App Password instead of your regular password:
