@@ -1,5 +1,4 @@
-import fs from 'fs-extra';
-import path from 'path';
+import pool, { initializeDatabase, queryWithRetries } from './dbClient';
 
 // Define the reminder data structure
 export interface ReminderData {
@@ -12,32 +11,39 @@ export interface ReminderData {
   createdAt: string;
 }
 
-// Path to the JSON file that will store our reminders
-const DATA_FILE = path.join(process.cwd(), 'data', 'reminders.json');
-
-// Ensure the data directory exists
-const ensureDataFile = async (): Promise<void> => {
-  try {
-    await fs.ensureDir(path.dirname(DATA_FILE));
-    
-    // Create the file if it doesn't exist
-    if (!(await fs.pathExists(DATA_FILE))) {
-      await fs.writeJson(DATA_FILE, { reminders: [] });
-    }
-  } catch (error) {
-    console.error('Error ensuring data file exists:', error);
-    throw error;
-  }
-};
+// Initialize the database when this module is imported
+initializeDatabase().catch(error => {
+  console.error('Failed to initialize database:', error);
+});
 
 // Get all reminders
 export const getAllReminders = async (): Promise<ReminderData[]> => {
   try {
-    await ensureDataFile();
-    const data = await fs.readJson(DATA_FILE);
-    return data.reminders || [];
+    // Use queryWithRetries to handle potential connection issues
+    const result = await queryWithRetries(() => 
+      pool.query(`
+        SELECT 
+          id::text, 
+          email, 
+          date, 
+          time, 
+          sent_confirmation as "sentConfirmation", 
+          sent_reminder as "sentReminder", 
+          created_at::text as "createdAt" 
+        FROM reminders
+      `),
+      5,  // 5 retries
+      2000 // 2 seconds initial delay (longer than default)
+    );
+
+    if (!result || !result.rows) {
+      console.error('Database returned invalid result when getting all reminders');
+      return [];
+    }
+
+    return result.rows;
   } catch (error) {
-    console.error('Error getting reminders:', error);
+    console.error('Error getting reminders from database:', error);
     return [];
   }
 };
@@ -45,28 +51,37 @@ export const getAllReminders = async (): Promise<ReminderData[]> => {
 // Add a new reminder
 export const addReminder = async (reminderData: Omit<ReminderData, 'id' | 'sentConfirmation' | 'sentReminder' | 'createdAt'>): Promise<ReminderData> => {
   try {
-    await ensureDataFile();
-    
-    const reminders = await getAllReminders();
-    
-    // Create a new reminder with a unique ID
-    const newReminder: ReminderData = {
-      ...reminderData,
-      id: Date.now().toString(),
-      sentConfirmation: false,
-      sentReminder: false,
-      createdAt: new Date().toISOString(),
-    };
-    
-    // Add the new reminder to the list
-    reminders.push(newReminder);
-    
-    // Save the updated list
-    await fs.writeJson(DATA_FILE, { reminders });
-    
-    return newReminder;
+    const { email, date, time } = reminderData;
+
+    // Use queryWithRetries to handle potential connection issues
+    const result = await queryWithRetries(() => 
+      pool.query(`
+        INSERT INTO reminders (email, date, time, sent_confirmation, sent_reminder)
+        VALUES ($1, $2, $3, false, false)
+        RETURNING 
+          id::text, 
+          email, 
+          date, 
+          time, 
+          sent_confirmation as "sentConfirmation", 
+          sent_reminder as "sentReminder", 
+          created_at::text as "createdAt"
+      `, [email, date, time]),
+      3,  // 3 retries
+      1000 // 1 second initial delay
+    );
+
+    if (!result || !result.rows || result.rows.length === 0) {
+      throw new Error('Database returned empty result when adding reminder');
+    }
+
+    return result.rows[0];
   } catch (error) {
-    console.error('Error adding reminder:', error);
+    console.error('Error adding reminder to database:', error);
+    // Rethrow with additional context
+    if (error instanceof Error) {
+      error.message = `Database error when adding reminder: ${error.message}`;
+    }
     throw error;
   }
 };
@@ -74,29 +89,62 @@ export const addReminder = async (reminderData: Omit<ReminderData, 'id' | 'sentC
 // Update a reminder
 export const updateReminder = async (id: string, updates: Partial<ReminderData>): Promise<ReminderData | null> => {
   try {
-    await ensureDataFile();
-    
-    const reminders = await getAllReminders();
-    
-    // Find the reminder to update
-    const index = reminders.findIndex(reminder => reminder.id === id);
-    
-    if (index === -1) {
+    // Build the SET part of the query dynamically based on the updates
+    const updateFields: string[] = [];
+    const values = [id];
+    let valueIndex = 2;
+
+    if (updates.sentConfirmation !== undefined) {
+      updateFields.push(`sent_confirmation = $${valueIndex}`);
+      values.push(String(updates.sentConfirmation));
+      valueIndex++;
+    }
+
+    if (updates.sentReminder !== undefined) {
+      updateFields.push(`sent_reminder = $${valueIndex}`);
+      values.push(String(updates.sentReminder));
+      valueIndex++;
+    }
+
+    // If no fields to update, return null
+    if (updateFields.length === 0) {
       return null;
     }
-    
-    // Update the reminder
-    reminders[index] = {
-      ...reminders[index],
-      ...updates,
-    };
-    
-    // Save the updated list
-    await fs.writeJson(DATA_FILE, { reminders });
-    
-    return reminders[index];
+
+    // Use queryWithRetries to handle potential connection issues
+    const result = await queryWithRetries(() => 
+      pool.query(`
+        UPDATE reminders
+        SET ${updateFields.join(', ')}
+        WHERE id = $1
+        RETURNING 
+          id::text, 
+          email, 
+          date, 
+          time, 
+          sent_confirmation as "sentConfirmation", 
+          sent_reminder as "sentReminder", 
+          created_at::text as "createdAt"
+      `, values),
+      5,  // 5 retries
+      2000 // 2 seconds initial delay (longer than default)
+    );
+
+    if (!result || !result.rows) {
+      throw new Error('Database returned invalid result when updating reminder');
+    }
+
+    if (result.rows.length === 0) {
+      return null;
+    }
+
+    return result.rows[0];
   } catch (error) {
-    console.error('Error updating reminder:', error);
+    console.error('Error updating reminder in database:', error);
+    // Rethrow with additional context
+    if (error instanceof Error) {
+      error.message = `Database error when updating reminder: ${error.message}`;
+    }
     throw error;
   }
 };
@@ -104,21 +152,38 @@ export const updateReminder = async (id: string, updates: Partial<ReminderData>)
 // Get pending reminders that need to be sent
 export const getPendingReminders = async (): Promise<ReminderData[]> => {
   try {
-    const reminders = await getAllReminders();
-    
     // Get the current time
-    const now = new Date();
-    
-    // Filter reminders that are due and haven't been sent yet
-    return reminders.filter(reminder => {
-      // Parse the reminder date and time
-      const reminderDateTime = new Date(`${reminder.date}T${reminder.time}`);
-      
-      // Check if the reminder is due and hasn't been sent
-      return !reminder.sentReminder && reminderDateTime <= now;
-    });
+    const now = new Date().toISOString();
+
+    // Use queryWithRetries to handle potential connection issues
+    const result = await queryWithRetries(() => 
+      pool.query(`
+        SELECT 
+          id::text, 
+          email, 
+          date, 
+          time, 
+          sent_confirmation as "sentConfirmation", 
+          sent_reminder as "sentReminder", 
+          created_at::text as "createdAt"
+        FROM reminders
+        WHERE 
+          sent_reminder = false AND
+          (date || 'T' || time)::timestamp <= $1::timestamp
+      `, [now]),
+      5,  // 5 retries
+      2000 // 2 seconds initial delay (longer than default)
+    );
+
+    if (!result || !result.rows) {
+      console.error('Database returned invalid result when getting pending reminders');
+      return [];
+    }
+
+    return result.rows;
   } catch (error) {
-    console.error('Error getting pending reminders:', error);
+    console.error('Error getting pending reminders from database:', error);
+    // Don't throw the error, just return an empty array to prevent the cron job from failing
     return [];
   }
 };
@@ -126,12 +191,33 @@ export const getPendingReminders = async (): Promise<ReminderData[]> => {
 // Get reminders that need confirmation emails
 export const getUnconfirmedReminders = async (): Promise<ReminderData[]> => {
   try {
-    const reminders = await getAllReminders();
-    
-    // Filter reminders that haven't had confirmation emails sent
-    return reminders.filter(reminder => !reminder.sentConfirmation);
+    // Use queryWithRetries to handle potential connection issues
+    const result = await queryWithRetries(() => 
+      pool.query(`
+        SELECT 
+          id::text, 
+          email, 
+          date, 
+          time, 
+          sent_confirmation as "sentConfirmation", 
+          sent_reminder as "sentReminder", 
+          created_at::text as "createdAt"
+        FROM reminders
+        WHERE sent_confirmation = false
+      `),
+      5,  // 5 retries
+      2000 // 2 seconds initial delay (longer than default)
+    );
+
+    if (!result || !result.rows) {
+      console.error('Database returned invalid result when getting unconfirmed reminders');
+      return [];
+    }
+
+    return result.rows;
   } catch (error) {
-    console.error('Error getting unconfirmed reminders:', error);
+    console.error('Error getting unconfirmed reminders from database:', error);
+    // Don't throw the error, just return an empty array to prevent the cron job from failing
     return [];
   }
 };

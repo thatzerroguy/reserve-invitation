@@ -25,15 +25,33 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Store the reminder
-    const reminder = await addReminder({ email, date, time });
+    // Store the reminder with retry logic
+    let reminder;
+    try {
+      reminder = await addReminder({ email, date, time });
+    } catch (dbError: any) {
+      console.error('Database error when adding reminder:', dbError);
+      return NextResponse.json(
+        { 
+          success: false, 
+          message: 'Database connection error. Please try again later.',
+          error: dbError.code || 'DB_ERROR'
+        },
+        { status: 503 }  // Service Unavailable
+      );
+    }
 
     // Send the confirmation email
     const success = await sendConfirmationEmail({ email, date, time });
 
     if (success) {
       // Update the reminder to mark confirmation as sent
-      await updateReminder(reminder.id, { sentConfirmation: true });
+      try {
+        await updateReminder(reminder.id, { sentConfirmation: true });
+      } catch (updateError) {
+        // Log the error but don't fail the request since the reminder was created
+        console.error('Error updating reminder confirmation status:', updateError);
+      }
 
       return NextResponse.json({
         success: true,
@@ -46,10 +64,16 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in send-reminder API route:', error);
+
+    // Provide more specific error messages based on the error type
+    const errorMessage = error.code === 'ETIMEDOUT' 
+      ? 'Database connection timed out. Please try again later.'
+      : 'Server error';
+
     return NextResponse.json(
-      { success: false, message: 'Server error' },
+      { success: false, message: errorMessage },
       { status: 500 }
     );
   }

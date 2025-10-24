@@ -52,8 +52,8 @@ export const sendConfirmationEmail = async ({ email, date, time }: SendEmailPara
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eaeaea; border-radius: 5px;">
           <h1 style="color: #333; text-align: center;">Diamond Jubilee Celebration</h1>
           <p style="font-size: 16px; line-height: 1.5;">Dear Guest,</p>
-          <p style="font-size: 16px; line-height: 1.5;">This is a reminder set-up confirmation for the upcoming Diamond Jubilee Celebration:</p>
-          <p style="font-size: 16px; line-height: 1.5;">Another Email according to your settings will be sent to you to remind you of the upcoming event.</p>
+          <p style="font-size: 16px; line-height: 1.5;">Your reminder for the Diamond Jubilee Celebration has been successfully set up:</p>
+          <p style="font-size: 16px; line-height: 1.5;">You will receive another email based on your reminder preferences to remind you of the big day.</p>
           <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
             <p style="margin: 5px 0;"><strong>Event:</strong> Diamond Jubilee Celebration</p>
             <p style="margin: 5px 0;"><strong>Reminder Date:</strong> ${formattedDate}</p>
@@ -72,12 +72,17 @@ export const sendConfirmationEmail = async ({ email, date, time }: SendEmailPara
   }
 };
 
+// Event date and time constants (from app/page.tsx)
+const EVENT_DATE = '2025-12-25'; // 25th December 2025 in ISO format
+const EVENT_TIME = '10:00'; // 10.00am in 24-hour format
+
 /**
  * Sends a reminder email at the scheduled date and time
  */
 export const sendReminderEmail = async ({ email, date, time }: SendEmailParams): Promise<boolean> => {
   try {
-    const { formattedDate, formattedTime } = formatDateTime(date, time);
+    // Use the event date and time instead of the user-input date and time
+    const { formattedDate, formattedTime } = formatDateTime(EVENT_DATE, EVENT_TIME);
 
     // Send the reminder email
     await transporter.sendMail({
