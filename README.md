@@ -4,6 +4,7 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 - Event invitation page
 - Email reminder service using Nodemailer
+- Scheduled reminders with confirmation emails
 - Responsive design
 
 ## Getting Started
@@ -64,6 +65,30 @@ EMAIL_PASS=your-app-password
    - Use that password in your `.env.local` file
 
 3. For other email providers, adjust the SMTP settings accordingly.
+
+4. **Important**: Remove all spaces from the app password (e.g., "xxxx xxxx xxxx xxxx" should be "xxxxxxxxxxxxxxxx")
+
+## Scheduled Reminders
+
+This project includes a scheduled reminder system that:
+
+1. Sends an immediate confirmation email when a user sets a reminder
+2. Sends a second reminder email at the scheduled date and time
+
+To enable the scheduled reminders functionality:
+
+1. Add the following to your `.env.local` file:
+
+```
+# Enable cron job in development mode (true/false)
+ENABLE_CRON=true
+```
+
+2. The cron job runs every minute to check for pending reminders that need to be sent.
+
+3. Reminder data is stored in a JSON file at `data/reminders.json` in the project root.
+
+4. You can check the status of the cron job by visiting `/api/cron` endpoint.
 
 ## Deploy on Vercel
 

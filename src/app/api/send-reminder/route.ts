@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sendReminderEmail } from '@/utils/emailService';
+import { sendConfirmationEmail } from '@/utils/emailService';
+import { addReminder, updateReminder } from '@/utils/reminderStorage';
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,17 +25,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Send the email
-    const success = await sendReminderEmail({ email, date, time });
+    // Store the reminder
+    const reminder = await addReminder({ email, date, time });
+
+    // Send the confirmation email
+    const success = await sendConfirmationEmail({ email, date, time });
 
     if (success) {
+      // Update the reminder to mark confirmation as sent
+      await updateReminder(reminder.id, { sentConfirmation: true });
+
       return NextResponse.json({
         success: true,
-        message: 'Reminder email sent successfully',
+        message: 'Reminder set successfully. Confirmation email sent.',
+        reminderId: reminder.id
       });
     } else {
       return NextResponse.json(
-        { success: false, message: 'Failed to send reminder email' },
+        { success: false, message: 'Failed to send confirmation email' },
         { status: 500 }
       );
     }

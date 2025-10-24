@@ -48,10 +48,10 @@ export default function ReminderPage() {
 
             if (response.ok && data.success) {
                 setToastType('success');
-                setToastMessage('Reminder email sent successfully!');
+                setToastMessage('Reminder set successfully! Check your email for confirmation.');
             } else {
                 setToastType('error');
-                setToastMessage(data.message || 'Failed to send reminder email. Please try again.');
+                setToastMessage(data.message || 'Failed to set reminder. Please try again.');
             }
 
             // Show toast
