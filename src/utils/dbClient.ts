@@ -60,7 +60,7 @@ export const queryWithRetries = async <T>(
   maxRetries = 3,
   initialDelay = 1000
 ): Promise<T> => {
-  let lastError: any;
+  let lastError: unknown;
   let delay = initialDelay;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -80,13 +80,13 @@ export const queryWithRetries = async <T>(
       ]) as T;
       
       // Clear the timeout if the query succeeds
-      clearTimeout(timeoutId!);
+      clearTimeout(timeoutId);
       return result;
-    } catch (error: any) {
+    } catch (error: unknown) {
       lastError = error;
 
       // Log the error for debugging
-      console.error(`Database query attempt ${attempt + 1} failed:`, error.message || error);
+      console.error(`Database query attempt ${attempt + 1} failed:`, (error as Error).message || error);
 
       // If this was the last attempt, throw the error
       if (attempt === maxRetries) {
@@ -95,18 +95,19 @@ export const queryWithRetries = async <T>(
       }
 
       // Check if the error is a connection error or an AggregateError that we should retry
-      const isAggregateError = error.name === 'AggregateError' || 
-                              (error.constructor && error.constructor.name === 'AggregateError');
+      const err = error as Error & { name?: string; code?: string; message?: string; constructor?: { name?: string } };
+      const isAggregateError = err.name === 'AggregateError' || 
+                              (err.constructor && err.constructor.name === 'AggregateError');
 
       const shouldRetry =
         isAggregateError ||
-        error.code === 'ETIMEDOUT' ||
-        error.code === 'ECONNREFUSED' ||
-        error.code === 'ECONNRESET' ||
-        error.code === '08006' || // Connection failure
-        error.code === '08001' || // Unable to connect
-        error.message?.includes('timeout') ||
-        error.message?.includes('timed out');
+        err.code === 'ETIMEDOUT' ||
+        err.code === 'ECONNREFUSED' ||
+        err.code === 'ECONNRESET' ||
+        err.code === '08006' || // Connection failure
+        err.code === '08001' || // Unable to connect
+        err.message?.includes('timeout') ||
+        err.message?.includes('timed out');
 
       if (!shouldRetry) {
         console.error('Error is not retryable. Throwing error.');

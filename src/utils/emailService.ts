@@ -79,7 +79,7 @@ const EVENT_TIME = '10:00'; // 10.00am in 24-hour format
 /**
  * Sends a reminder email at the scheduled date and time
  */
-export const sendReminderEmail = async ({ email, date, time }: SendEmailParams): Promise<boolean> => {
+export const sendReminderEmail = async ({ email }: SendEmailParams): Promise<boolean> => {
   try {
     // Use the event date and time instead of the user-input date and time
     const { formattedDate, formattedTime } = formatDateTime(EVENT_DATE, EVENT_TIME);

@@ -29,13 +29,14 @@ export async function POST(request: NextRequest) {
     let reminder;
     try {
       reminder = await addReminder({ email, date, time });
-    } catch (dbError: any) {
+    } catch (dbError: unknown) {
       console.error('Database error when adding reminder:', dbError);
+      const err = dbError as { code?: string };
       return NextResponse.json(
         { 
           success: false, 
           message: 'Database connection error. Please try again later.',
-          error: dbError.code || 'DB_ERROR'
+          error: err.code || 'DB_ERROR'
         },
         { status: 503 }  // Service Unavailable
       );
@@ -64,11 +65,12 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in send-reminder API route:', error);
 
     // Provide more specific error messages based on the error type
-    const errorMessage = error.code === 'ETIMEDOUT' 
+    const err = error as { code?: string };
+    const errorMessage = err.code === 'ETIMEDOUT' 
       ? 'Database connection timed out. Please try again later.'
       : 'Server error';
 
