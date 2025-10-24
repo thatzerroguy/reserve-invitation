@@ -9,7 +9,8 @@ export const startReminderCron = () => {
   // Schedule the cron job to run every minute
   const job = cron.schedule('* * * * *', async () => {
     try {
-      console.log('Checking for pending reminders...');
+      const now = new Date().toISOString();
+      console.log('Checking for pending reminders at:', now);
       
       // Get all pending reminders
       const pendingReminders = await getPendingReminders();

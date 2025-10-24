@@ -154,6 +154,27 @@ export const getPendingReminders = async (): Promise<ReminderData[]> => {
   try {
     // Get the current time
     const now = new Date().toISOString();
+    console.log('[getPendingReminders] Current time:', now);
+
+    // Debug: Check all unsent reminders first
+    const allUnsentResult = await queryWithRetries(() => 
+      pool.query(`
+        SELECT 
+          id::text, 
+          email, 
+          date, 
+          time, 
+          sent_reminder,
+          ((date || ' ' || time)::timestamp AT TIME ZONE 'Africa/Lagos') as reminder_datetime,
+          NOW() as current_time,
+          (((date || ' ' || time)::timestamp AT TIME ZONE 'Africa/Lagos') <= NOW()) as is_due
+        FROM reminders
+        WHERE sent_reminder = false
+      `, []),
+      5,
+      2000
+    );
+    console.log('[getPendingReminders] All unsent reminders:', allUnsentResult.rows);
 
     // Use queryWithRetries to handle potential connection issues
     const result = await queryWithRetries(() => 
@@ -169,8 +190,8 @@ export const getPendingReminders = async (): Promise<ReminderData[]> => {
         FROM reminders
         WHERE 
           sent_reminder = false AND
-          (date || 'T' || time)::timestamp <= $1::timestamp
-      `, [now]),
+          ((date || ' ' || time)::timestamp AT TIME ZONE 'Africa/Lagos') <= NOW()
+      `, []),
       5,  // 5 retries
       2000 // 2 seconds initial delay (longer than default)
     );
@@ -178,6 +199,11 @@ export const getPendingReminders = async (): Promise<ReminderData[]> => {
     if (!result || !result.rows) {
       console.error('Database returned invalid result when getting pending reminders');
       return [];
+    }
+
+    console.log('[getPendingReminders] Found reminders:', result.rows.length);
+    if (result.rows.length > 0) {
+      console.log('[getPendingReminders] First reminder:', result.rows[0]);
     }
 
     return result.rows;
