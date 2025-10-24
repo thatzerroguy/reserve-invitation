@@ -66,7 +66,7 @@ export const queryWithRetries = async <T>(
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       // Execute the query with a timeout
-      let timeoutId: NodeJS.Timeout;
+      let timeoutId: NodeJS.Timeout | undefined;
       const timeoutPromise = new Promise<never>((_, reject) => {
         timeoutId = setTimeout(() => {
           reject(new Error('Query execution timed out'));
@@ -80,7 +80,7 @@ export const queryWithRetries = async <T>(
       ]) as T;
       
       // Clear the timeout if the query succeeds
-      clearTimeout(timeoutId);
+      if (timeoutId) clearTimeout(timeoutId);
       return result;
     } catch (error: unknown) {
       lastError = error;
