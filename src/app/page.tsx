@@ -7,7 +7,7 @@ export default function InvitationPage() {
   const router = useRouter();
 
   // Phone number & Google Maps link (you can replace these later)
-  const phoneNumber = '+2348032560690';
+  const phoneNumber = '+2348032560590';
   const mapLink =
       'https://maps.app.goo.gl/NyvQw3YMsG5Eqw9x6';
 
