@@ -63,7 +63,7 @@ export default function InvitationPage() {
 
           {/* Event Details */}
           <div className="text-gray-700 text-sm md:text-base space-y-1 mb-6">
-            <p><span className="font-semibold">Date:</span> 25th December 2025</p>
+            <p><span className="font-semibold">Date:</span> 25th October 2025</p>
             <p><span className="font-semibold">Time:</span> 10.00am</p>
             <p>ABIGAIL OMOTAYO EVENT CENTRE</p>
             <p>ALAMEDA BUS STOP. OPPOSITE IFO HIGH COURT IFO. OGUN STATE</p>
